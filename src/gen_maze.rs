@@ -53,12 +53,46 @@ pub fn gen_maze(h: u16, w: u16) -> (Vec<Vec<bool>>, Point3) {
         let element = from_index!(walls.remove(index));
 
         let mut unopen = 0;
-        if element.0 > 0 && !out[element.1][element.0 - 1] {
-            unopen += 1;
+        { // if element.0 > 0 && !out[element.1][element.0 - 1] {
+             //     unopen += 1;
+             // }
+             // if element.0 < w - 1 && !out[element.1][element.0 + 1] {
+             //     unopen += 1;
+             // }
+             // if element.1 > 0 && !out[element.1 - 1][element.0] {
+             //     unopen += 1;
+             // }
+             // if element.1 < h - 1 && !out[element.1 + 1][element.0] {
+             //     unopen += 1;
+             // }
         }
-        if element.0 < w - 1 && !out[element.1][element.0 + 1] {
-            unopen += 1;
+
+        // println!("{:?}", walls);
+        {
+            if element.0 > 0 {
+                if element.1 > 0 && !out[element.1 - 1][element.0 - 1] {
+                    unopen += 1;
+                }
+                if !out[element.1][element.0 - 1] {
+                    unopen += 1;
+                }
+                if element.1 < h - 1 && !out[element.1 + 1][element.0 - 1] {
+                    unopen += 1;
+                }
+            }
+            if element.0 < w - 1 {
+                if element.1 > 0 && !out[element.1 - 1][element.0 + 1] {
+                    unopen += 1;
+                }
+                if !out[element.1][element.0 + 1] {
+                    unopen += 1;
+                }
+                if element.1 < h - 1 && !out[element.1 + 1][element.0 + 1] {
+                    unopen += 1;
+                }
+            }
         }
+
         if element.1 > 0 && !out[element.1 - 1][element.0] {
             unopen += 1;
         }
@@ -66,42 +100,11 @@ pub fn gen_maze(h: u16, w: u16) -> (Vec<Vec<bool>>, Point3) {
             unopen += 1;
         }
 
-        // println!("{:?}", walls);
-        // if element.0 > 0 {
-        //     if element.1 > 0 && !out[element.1 - 1][element.0 - 1] {
-        //         unopen += 1;
-        //     }
-        //     if !out[element.1][element.0 - 1] {
-        //         unopen += 1;
-        //     }
-        //     if element.1 < h - 1 && !out[element.1 + 1][element.0 - 1] {
-        //         unopen += 1;
-        //     }
-        // }
-        // if element.0 < w - 1 {
-        //     if element.1 > 0 && !out[element.1 - 1][element.0 + 1] {
-        //         unopen += 1;
-        //     }
-        //     if !out[element.1][element.0 + 1] {
-        //         unopen += 1;
-        //     }
-        //     if element.1 < h - 1 && !out[element.1 + 1][element.0 + 1] {
-        //         unopen += 1;
-        //     }
-        // }
-
-        // if element.1 > 0 && !out[element.1 - 1][element.0] {
-        //     unopen += 1;
-        // }
-        // if element.1 < h - 1 && !out[element.1 + 1][element.0] {
-        //     unopen += 1;
-        // }
-
-        if (1..=1).contains(&unopen)
-            // && (!out[element.1 + 1][element.1]
-            //     || !out[element.1 - 1][element.1]
-            //     || !out[element.1][element.1 + 1]
-            //     || !out[element.1][element.1 - 1])
+        if (1..=2).contains(&unopen)
+            && !(out[element.1 + 1][element.0]
+                && out[element.1 - 1][element.0]
+                && out[element.1][element.0 + 1]
+                && out[element.1][element.0 - 1])
         {
             cur = (element.0, element.1);
             out[element.1][element.0] = false;

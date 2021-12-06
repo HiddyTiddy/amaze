@@ -94,11 +94,10 @@ impl Widget<AppData> for Canvas {
                     self.paint_timer_id = ctx.request_timer(deadline);
                 }
                 if *id == self.tick_timer_id {
-                    let t0 = Instant::now();
                     data.path_finder.step();
                     
                     self.tick_timer_id =
-                        ctx.request_timer(Duration::from_millis(data.tick_interval()) - (Instant::now() - t0));
+                        ctx.request_timer(Duration::from_millis(data.tick_interval()));
                 }
                 self.last_update = Instant::now();
             }
