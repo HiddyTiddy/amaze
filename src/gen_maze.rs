@@ -1,5 +1,7 @@
-use crate::Point3;
+
 use rand::Rng;
+
+use crate::util::Point3;
 
 macro_rules! to_index {
     ($a:expr, $b:expr) => {
@@ -10,7 +12,7 @@ macro_rules! to_index {
 macro_rules! from_index {
     ($ind:expr) => {{
         let tmp = $ind;
-        ((((tmp) >> 16) & 0xff, (tmp) & 0xff))
+        ((((tmp) >> 16) & 0xffff, (tmp) & 0xffff))
     }};
 }
 

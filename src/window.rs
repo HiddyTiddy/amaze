@@ -1,13 +1,13 @@
-mod path_finders;
-mod gen_maze;
-mod util;
-use crate::util::Point3;
-use crate::path_finders::bfs::Bfs;
-use gen_maze::gen_maze;
-use path_finders::dfs::Dfs;
-use path_finders::path_finder::PathFinder;
+use crate::gen_maze::gen_maze;
 
-use std::time::{Duration, Instant};
+#[allow(unused_imports)]
+use crate::path_finders::{a_star::Astar, bfs::Bfs, dfs::Dfs, dijkstra::Dijkstra, path_finder::PathFinder,};
+
+use crate::util::Point3;
+
+type Pf = Astar;
+
+use std::time::Duration;
 
 use druid::{
     widget::Flex, AppLauncher, Color, Data, Event, PlatformError, Point, Rect, RenderContext, Size,
@@ -19,9 +19,8 @@ struct AppData {
     frames_per_second: f64,
     updates_per_second: f64,
     #[data(ignore)]
-    path_finder: Dfs,
+    path_finder: Pf,
 }
-
 
 impl AppData {
     fn new() -> Self {
@@ -34,12 +33,12 @@ impl AppData {
         //     vec![true, false, false, false, true, false, false],
         //     vec![true; 7],
         // ];
-        let (maze, end) = gen_maze(100,100);
+        let (maze, end) = gen_maze(75, 75);
 
         AppData {
-            frames_per_second: 60.0,
-            updates_per_second: 120.0,
-            path_finder: Dfs::new(maze, Point3::new(0, 1), end),
+            frames_per_second: 20.0,
+            updates_per_second: 40.0,
+            path_finder: Pf::new(maze, Point3::new(0, 1), end),
         }
     }
     fn iter_interval(&self) -> u64 {
@@ -47,7 +46,7 @@ impl AppData {
     }
 
     pub fn tick_interval(&self) -> u64 {
-        (1000. / (self.updates_per_second )) as u64
+        (1000. / (self.updates_per_second)) as u64
     }
 
     pub fn maze(&self) -> &Vec<Vec<bool>> {
@@ -58,14 +57,14 @@ impl AppData {
 struct Canvas {
     paint_timer_id: TimerToken,
     tick_timer_id: TimerToken,
-    last_update: Instant,
+    //last_update: Instant,
 }
 
 impl Canvas {
     fn new() -> Self {
         Self {
             paint_timer_id: TimerToken::INVALID,
-            last_update: Instant::now(),
+            //last_update: Instant::now(),
             tick_timer_id: TimerToken::INVALID,
         }
     }
@@ -83,7 +82,7 @@ impl Widget<AppData> for Canvas {
             Event::WindowConnected => {
                 ctx.request_paint();
                 let deadline = Duration::from_millis(data.iter_interval());
-                self.last_update = Instant::now();
+                //self.last_update = Instant::now();
                 self.paint_timer_id = ctx.request_timer(deadline);
                 self.tick_timer_id = ctx.request_timer(Duration::from_millis(data.tick_interval()));
             }
@@ -95,11 +94,11 @@ impl Widget<AppData> for Canvas {
                 }
                 if *id == self.tick_timer_id {
                     data.path_finder.step();
-                    
+
                     self.tick_timer_id =
                         ctx.request_timer(Duration::from_millis(data.tick_interval()));
                 }
-                self.last_update = Instant::now();
+                //self.last_update = Instant::now();
             }
             _ => (),
         }
@@ -144,8 +143,13 @@ impl Widget<AppData> for Canvas {
         let rect = Rect::from_origin_size(Point::ORIGIN, ctx.size());
         ctx.fill(rect, &Color::rgb8(0x3B, 0x42, 0x52));
 
-        let height = (ctx.size().height - 80.) / (data.maze().len() as f64);
-        let width = (ctx.size().width - 80.) / (data.maze()[0].len() as f64);
+        let min_w = if ctx.size().height < ctx.size().width {
+            ctx.size().height
+        } else {
+            ctx.size().width
+        };
+        let height = (min_w - 80.) / (data.maze().len() as f64);
+        let width = height;
         for (i, row) in data.maze().iter().enumerate() {
             for (j, val) in row.iter().enumerate() {
                 let color = if !*val {
@@ -177,6 +181,22 @@ impl Widget<AppData> for Canvas {
             let color = Color::rgb8(0xEB, 0xCB, 0x8B);
             ctx.fill(rect, &color);
         }
+        
+        for estimated in data.path_finder.get_estimated_path() {
+            let rect = Rect::from_points(
+                Point::new(
+                    40. + (estimated.x as f64) * width,
+                    40. + (estimated.y as f64) * height,
+                ),
+                Point::new(
+                    40. + (estimated.x as f64) * width + width,
+                    40. + (estimated.y as f64) * height + width,
+                ),
+            );
+            let color = Color::rgb8(0x5E, 0x81, 0xAC);
+            ctx.fill(rect, &color);
+        }
+
         ctx.fill(
             Rect::from_points(
                 Point::new(
@@ -192,14 +212,8 @@ impl Widget<AppData> for Canvas {
         );
         ctx.fill(
             Rect::from_points(
-                Point::new(
-                    40.,
-                    40. + height,
-                ),
-                Point::new(
-                    40. + width,
-                    40.+ 2.0 * height,
-                ),
+                Point::new(40., 40. + height),
+                Point::new(40. + width, 40. + 2.0 * height),
             ),
             &Color::rgb8(0xD0, 0x87, 0x70),
         );
@@ -226,7 +240,7 @@ fn make_widget() -> impl Widget<AppData> {
 //     }
 // }
 
-fn main() -> Result<(), PlatformError> {
+pub fn run() -> Result<(), PlatformError> {
     let appdata = AppData::new();
     let window = WindowDesc::new(make_widget)
         .window_size(Size {

@@ -75,4 +75,5 @@ impl PathFinder for Bfs {
     fn done(&self) -> bool {
         self.done
     }
+fn get_estimated_path(&self) -> Vec<Point3> { todo!() }
 }

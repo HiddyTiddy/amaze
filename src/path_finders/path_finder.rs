@@ -8,4 +8,5 @@ pub trait PathFinder {
     fn get_maze(&self) -> &Vec<Vec<bool>>;
     fn end(&self) -> Point3;
     fn done(&self) -> bool;
+    fn get_estimated_path(&self) -> Vec<Point3>;
 }
