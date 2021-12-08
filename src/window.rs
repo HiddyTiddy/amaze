@@ -72,6 +72,19 @@ impl Canvas {
     }
 }
 
+fn make_rect(coords:Point3, width: f64, height: f64) -> Rect {
+    Rect::from_points(
+        Point::new(
+            40. + coords.x as f64 * width,
+            40. + coords.y as f64 * height,
+        ),
+        Point::new(
+            40. + coords.x as f64 * width + width,
+            40. + coords.y as f64 * height + width,
+        ),
+    )
+}
+
 impl Widget<AppData> for Canvas {
     fn event(
         &mut self,
@@ -159,57 +172,27 @@ impl Widget<AppData> for Canvas {
                 } else {
                     Color::rgb8(0x88, 0xC0, 0xD0)
                 };
-                let rect = Rect::from_points(
-                    Point::new(40. + (j as f64) * width, 40. + (i as f64) * height),
-                    Point::new(
-                        40. + (j as f64) * width + width,
-                        40. + (i as f64) * height + width,
-                    ),
-                );
-                ctx.fill(rect, &color);
+                ctx.fill(make_rect(Point3::new(j as u16,i as u16), width, height), &color);
             }
         }
         for gekoloniseert in data.path_finder.get_progress() {
-            let rect = Rect::from_points(
-                Point::new(
-                    40. + (gekoloniseert.x as f64) * width,
-                    40. + (gekoloniseert.y as f64) * height,
-                ),
-                Point::new(
-                    40. + (gekoloniseert.x as f64) * width + width,
-                    40. + (gekoloniseert.y as f64) * height + width,
-                ),
-            );
             let color = Color::rgb8(0xEB, 0xCB, 0x8B);
-            ctx.fill(rect, &color);
+            ctx.fill(make_rect(*gekoloniseert, width, height), &color);
         }
 
         for estimated in data.path_finder.get_estimated_path() {
-            let rect = Rect::from_points(
-                Point::new(
-                    40. + (estimated.x as f64) * width,
-                    40. + (estimated.y as f64) * height,
-                ),
-                Point::new(
-                    40. + (estimated.x as f64) * width + width,
-                    40. + (estimated.y as f64) * height + width,
-                ),
-            );
             let color = Color::rgb8(0x5E, 0x81, 0xAC);
-            ctx.fill(rect, &color);
+            ctx.fill(make_rect(estimated, width, height), &color);
+        }
+        
+        // Dfs only
+        for each in data.path_finder.get_considered() {
+            let color = Color::rgb8(0xA3, 0xBE, 0x8C);
+            ctx.fill(make_rect(*each, width, height), &color);
         }
 
         ctx.fill(
-            Rect::from_points(
-                Point::new(
-                    40. + data.path_finder.end().x as f64 * width,
-                    40. + data.path_finder.end().y as f64 * height,
-                ),
-                Point::new(
-                    40. + data.path_finder.end().x as f64 * width + width,
-                    40. + data.path_finder.end().y as f64 * height + height,
-                ),
-            ),
+            make_rect(data.path_finder.end(), width, height),
             &Color::rgb8(0xBF, 0x61, 0x6A),
         );
         ctx.fill(
@@ -234,7 +217,7 @@ pub fn run() -> Result<(), PlatformError> {
             height: 800.0,
         })
         .resizable(false)
-        .title("title");
+        .title("confused snek");
     AppLauncher::with_window(window)
         // .log_to_console()
         .launch(appdata)
