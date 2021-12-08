@@ -14,6 +14,7 @@ pub struct Dijkstra {
     prev: HashMap<PointHash, PointHash>,
     done: bool,
     vertex_set: DoublePriorityQueue<PointHash, u32>,
+    start: Point3,
 }
 
 impl PathFinder for Dijkstra {
@@ -38,6 +39,7 @@ impl PathFinder for Dijkstra {
             prev,
             done: false,
             vertex_set,
+            start,
         }
     }
 
@@ -107,5 +109,20 @@ impl PathFinder for Dijkstra {
         self.done
     }
 
-    fn get_estimated_path(&self) -> Vec<Point3> { todo!() }
+    fn get_estimated_path(&self) -> Vec<Point3> {
+        if let Some(current) = self.progress.last() {
+            let mut current = *current;
+            let mut out = vec![current];
+
+            while current.hash() != self.start.hash() {
+                current = Point3::from(*self.prev.get(&current.hash()).unwrap());
+                out.push(current);
+            }
+
+            out.reverse();
+            out
+        } else {
+            vec![]
+        }
+    }
 }

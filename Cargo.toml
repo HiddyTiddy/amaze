@@ -10,7 +10,7 @@ crate-type = ["cdylib", "rlib"]
 
 [[bin]]
 name = "main"
-path = "src/lib.rs"
+path = "src/main.rs"
 
 [dependencies]
 druid = "0.7.0"

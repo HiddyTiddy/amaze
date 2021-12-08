@@ -1,11 +1,13 @@
 use crate::gen_maze::gen_maze;
 
 #[allow(unused_imports)]
-use crate::path_finders::{a_star::Astar, bfs::Bfs, dfs::Dfs, dijkstra::Dijkstra, path_finder::PathFinder,};
+use crate::path_finders::{
+    a_star::Astar, bfs::Bfs, dfs::Dfs, dijkstra::Dijkstra, path_finder::PathFinder,
+};
 
 use crate::util::Point3;
 
-type Pf = Astar;
+type Pf = Dijkstra;
 
 use std::time::Duration;
 
@@ -181,7 +183,7 @@ impl Widget<AppData> for Canvas {
             let color = Color::rgb8(0xEB, 0xCB, 0x8B);
             ctx.fill(rect, &color);
         }
-        
+
         for estimated in data.path_finder.get_estimated_path() {
             let rect = Rect::from_points(
                 Point::new(

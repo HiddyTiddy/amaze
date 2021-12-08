@@ -13,9 +13,3 @@ pub fn wasm_main() {
     std::panic::set_hook(Box::new(console_error_panic_hook::hook));
     if let Err(_err) = run() {}
 }
-
-pub fn main() {
-    if let Err(err) = run() {
-        eprintln!("error: {}", err);
-    }
-}
