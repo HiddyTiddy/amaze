@@ -1,5 +1,5 @@
-use crate::util::Point3;
-use std::collections::{HashSet, VecDeque};
+use crate::util::{Point3, PointHash};
+use std::collections::{HashMap, VecDeque};
 
 use super::path_finder::PathFinder;
 
@@ -9,8 +9,9 @@ pub struct Bfs {
     queue: VecDeque<Point3>,
     end: Point3,
     progress: Vec<Point3>,
-    seen: HashSet<u32>,
+    prev: HashMap<PointHash, PointHash>,
     done: bool,
+    start: Point3,
 }
 
 impl PathFinder for Bfs {
@@ -19,7 +20,7 @@ impl PathFinder for Bfs {
             return;
         }
         if let Some(current) = self.queue.pop_front() {
-            if current == self.end {
+            if current.hash() == self.end.hash() {
                 self.done = true;
             }
             let mut neighbors = vec![];
@@ -40,10 +41,10 @@ impl PathFinder for Bfs {
                     (current.x as i32 + neighbor.0) as u16,
                     (current.y as i32 + neighbor.1) as u16,
                 );
-                let key = (new.x as u32) << 16 | new.y as u32;
-                if !self.maze[new.y as usize][new.x as usize] && !self.seen.contains(&key) {
+                let key = new.hash();
+                if !self.maze[new.y as usize][new.x as usize] && !self.prev.contains_key(&key) {
                     self.queue.push_back(new);
-                    self.seen.insert(key);
+                    self.prev.insert(key, current.hash());
                 }
             }
             self.progress.push(current);
@@ -64,18 +65,34 @@ impl PathFinder for Bfs {
             queue: VecDeque::from([start]),
             end,
             progress: vec![start],
-            seen: HashSet::new(),
+            prev: HashMap::new(),
             done: false,
+            start
         }
     }
 
     fn end(&self) -> Point3 {
         self.end
     }
+
     fn done(&self) -> bool {
         self.done
     }
+
     fn get_estimated_path(&self) -> Vec<Point3> {
-        todo!()
+        if let Some(current) = self.progress.last() {
+            let mut current = *current;
+            let mut out = vec![current];
+
+            while current.hash() != self.start.hash() {
+                current = Point3::from(*self.prev.get(&current.hash()).unwrap());
+                out.push(current);
+            }
+
+            out.reverse();
+            out
+        } else {
+            vec![]
+        }
     }
 }

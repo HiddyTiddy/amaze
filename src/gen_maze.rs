@@ -2,20 +2,20 @@ use rand::Rng;
 
 use crate::util::Point3;
 
-macro_rules! to_index {
-    ($a:expr, $b:expr) => {
-        ((($a) << 16) | ($b))
-    };
-}
+// macro_rules! to_index {
+//     ($a:expr, $b:expr) => {
+//         ((($a) << 16) | ($b)).into()
+//     };
+// }
 
-macro_rules! from_index {
-    ($ind:expr) => {{
-        let tmp = $ind;
-        ((((tmp) >> 16) & 0xffff, (tmp) & 0xffff))
-    }};
-}
+// macro_rules! from_index {
+//     ($ind:expr) => {{
+//         let tmp = $ind;
+//         ((((tmp) >> 16) & 0xffff, (tmp) & 0xffff))
+//     }};
+// }
 
-fn insert(walls: &mut Vec<usize>, element: usize) {
+fn insert(walls: &mut Vec<u32>, element: u32) {
     for (i, j) in walls.iter().enumerate() {
         if *j == element {
             return;
@@ -41,17 +41,17 @@ pub fn gen_maze(h: u16, w: u16) -> (Vec<Vec<bool>>, Point3) {
     let w = w as usize;
     let h = h as usize;
     let mut out = vec![vec![true; w]; h];
-    let mut cur = (0, 1);
-    out[cur.1][cur.0] = false;
+    let mut cur = Point3::new(0, 1);
+    out[cur.y as usize][cur.x as usize] = false;
 
-    let mut walls = vec![to_index!(1, 1)];
+    let mut walls = vec![Point3::new(1, 1).hash()];
     walls.sort_unstable(); // lol clippy
     let mut rng = rand::thread_rng();
 
     while !walls.is_empty() {
         let index = rng.gen_range(0..walls.len());
         // println!("{} / {}", index, walls.len());
-        let element = from_index!(walls.remove(index));
+        let element = Point3::from(walls.remove(index));
 
         let mut unopen = 0;
         { // if element.0 > 0 && !out[element.1][element.0 - 1] {
@@ -68,47 +68,50 @@ pub fn gen_maze(h: u16, w: u16) -> (Vec<Vec<bool>>, Point3) {
              // }
         }
 
-        // println!("{:?}", walls);
         {
-            if element.0 > 0 {
-                if element.1 > 0 && !out[element.1 - 1][element.0 - 1] {
+            if element.x > 0 {
+                if element.y > 0 && !out[element.y as usize - 1][element.x as usize - 1] {
                     unopen += 1;
                 }
-                if !out[element.1][element.0 - 1] {
+                if !out[element.y as usize][element.x as usize - 1] {
                     unopen += 1;
                 }
-                if element.1 < h - 1 && !out[element.1 + 1][element.0 - 1] {
+                if (element.y as usize) < h - 1
+                    && !out[element.y as usize + 1][element.x as usize - 1]
+                {
                     unopen += 1;
                 }
             }
-            if element.0 < w - 1 {
-                if element.1 > 0 && !out[element.1 - 1][element.0 + 1] {
+            if (element.x as usize) < w - 1 {
+                if element.y > 0 && !out[element.y as usize - 1][element.x as usize + 1] {
                     unopen += 1;
                 }
-                if !out[element.1][element.0 + 1] {
+                if !out[element.y as usize][element.x as usize + 1] {
                     unopen += 1;
                 }
-                if element.1 < h - 1 && !out[element.1 + 1][element.0 + 1] {
+                if (element.y as usize) < h - 1
+                    && !out[element.y as usize + 1][element.x as usize + 1]
+                {
                     unopen += 1;
                 }
             }
         }
 
-        if element.1 > 0 && !out[element.1 - 1][element.0] {
+        if element.y > 0 && !out[element.y as usize - 1][element.x as usize] {
             unopen += 1;
         }
-        if element.1 < h - 1 && !out[element.1 + 1][element.0] {
+        if (element.y as usize) < h - 1 && !out[(element.y as usize) + 1][element.x as usize] {
             unopen += 1;
         }
 
         if (1..=2).contains(&unopen)
-            && !(out[element.1 + 1][element.0]
-                && out[element.1 - 1][element.0]
-                && out[element.1][element.0 + 1]
-                && out[element.1][element.0 - 1])
+            && !(out[element.y as usize + 1][element.x as usize]
+                && out[element.y as usize - 1][element.x as usize]
+                && out[element.y as usize][element.x as usize + 1]
+                && out[element.y as usize][element.x as usize - 1])
         {
-            cur = (element.0, element.1);
-            out[element.1][element.0] = false;
+            cur = element;
+            out[element.y as usize][element.x as usize] = false;
 
             // if element.0 > 1 {
             //     if element.1 > 1 && out[element.1 - 1][element.0 - 1] {
@@ -140,17 +143,17 @@ pub fn gen_maze(h: u16, w: u16) -> (Vec<Vec<bool>>, Point3) {
             //     insert(&mut walls, to_index!(element.0, element.1+1));
             // }
 
-            if element.0 > 1 && out[element.1][element.0 - 1] {
-                insert(&mut walls, to_index!(element.0 - 1, element.1));
+            if element.x > 1 && out[element.y as usize][element.x as usize - 1] {
+                insert(&mut walls, Point3::new(element.x - 1, element.y).hash());
             }
-            if element.0 < w - 2 && out[element.1][element.0 + 1] {
-                insert(&mut walls, to_index!(element.0 + 1, element.1));
+            if (element.x as usize) < w - 2 && out[element.y as usize][element.x as usize + 1] {
+                insert(&mut walls, Point3::new(element.x + 1, element.y).hash());
             }
-            if element.1 > 1 && out[element.1 - 1][element.0] {
-                insert(&mut walls, to_index!(element.0, element.1 - 1));
+            if element.y > 1 && out[element.y as usize - 1][element.x as usize] {
+                insert(&mut walls, Point3::new(element.x, element.y - 1).hash());
             }
-            if element.1 < h - 2 && out[element.1 + 1][element.0] {
-                insert(&mut walls, to_index!(element.0, element.1 + 1));
+            if (element.y as usize) < h - 2 && out[element.y as usize + 1][element.x as usize] {
+                insert(&mut walls, Point3::new(element.x, element.y + 1).hash());
             }
         }
 
@@ -174,7 +177,6 @@ pub fn gen_maze(h: u16, w: u16) -> (Vec<Vec<bool>>, Point3) {
         // }
     }
 
-    println!("{}", out[cur.1][cur.0]);
 
-    (out, Point3::new(cur.1 as u16, cur.0 as u16))
+    (out, cur)
 }

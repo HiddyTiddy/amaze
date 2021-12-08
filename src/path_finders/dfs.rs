@@ -1,6 +1,6 @@
-use std::collections::HashSet;
+use std::collections::HashMap;
 
-use crate::util::Point3;
+use crate::util::{Point3, PointHash};
 
 use super::path_finder::PathFinder;
 
@@ -10,8 +10,9 @@ pub struct Dfs {
     stack: Vec<Point3>,
     end: Point3,
     progress: Vec<Point3>,
-    seen: HashSet<u32>,
+    prev: HashMap<PointHash, PointHash>,
     done: bool,
+    start: Point3,
 }
 
 impl PathFinder for Dfs {
@@ -20,32 +21,29 @@ impl PathFinder for Dfs {
             return;
         }
         if let Some(current) = self.stack.pop() {
-            if current == self.end {
+            if current.hash() == self.end.hash() {
                 self.done = true;
                 println!("done!");
             }
             let mut neighbors = vec![];
-            if current.x > 0 {
-                neighbors.push((-1, 0));
-            }
             if current.x < self.maze[0].len() as u16 - 1 {
-                neighbors.push((1, 0));
+                neighbors.push(Point3::new(current.x + 1, current.y));
             }
             if current.y > 0 {
-                neighbors.push((0, -1));
+                neighbors.push(Point3::new(current.x, current.y - 1));
+            }
+            if current.x > 0 {
+                neighbors.push(Point3::new(current.x - 1, current.y));
             }
             if current.y < self.maze.len() as u16 - 1 {
-                neighbors.push((0, 1));
+                neighbors.push(Point3::new(current.x, current.y + 1));
             }
             for neighbor in neighbors {
-                let new = Point3::new(
-                    (current.x as i32 + neighbor.0) as u16,
-                    (current.y as i32 + neighbor.1) as u16,
-                );
-                let key = (new.x as u32) << 16 | new.y as u32;
-                if !self.maze[new.y as usize][new.x as usize] && !self.seen.contains(&key) {
-                    self.stack.push(new);
-                    self.seen.insert(key);
+                if !self.maze[neighbor.y as usize][neighbor.x as usize]
+                    && !self.prev.contains_key(&neighbor.hash())
+                {
+                    self.stack.push(neighbor);
+                    self.prev.insert(neighbor.hash(), current.hash());
                 }
             }
             self.progress.push(current);
@@ -66,8 +64,9 @@ impl PathFinder for Dfs {
             stack: vec![start],
             end,
             progress: vec![start],
-            seen: HashSet::new(),
+            prev: HashMap::new(),
             done: false,
+            start,
         }
     }
 
@@ -79,6 +78,19 @@ impl PathFinder for Dfs {
     }
 
     fn get_estimated_path(&self) -> Vec<Point3> {
-        todo!()
+        if let Some(current) = self.progress.last() {
+            let mut current = *current;
+            let mut out = vec![current];
+
+            while current.hash() != self.start.hash() {
+                current = Point3::from(*self.prev.get(&current.hash()).unwrap());
+                out.push(current);
+            }
+
+            out.reverse();
+            out
+        } else {
+            vec![]
+        }
     }
 }

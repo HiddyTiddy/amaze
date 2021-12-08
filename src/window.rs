@@ -7,7 +7,7 @@ use crate::path_finders::{
 
 use crate::util::Point3;
 
-type Pf = Dijkstra;
+type Pf = Dfs;
 
 use std::time::Duration;
 
@@ -225,22 +225,6 @@ impl Widget<AppData> for Canvas {
 fn make_widget() -> impl Widget<AppData> {
     Flex::column().with_flex_child(Canvas::new(), 1.0)
 }
-
-// fn main() {
-//     let (maze, end) = gen_maze(10, 10);
-//     for (i, row) in maze.iter().enumerate() {
-//         let mut line = "".to_string();
-//         for (j, val) in row.iter().enumerate() {
-//             match (i as u16, j as u16) {
-//                 (1, 0) => line += "s",
-//                 coord if coord == end => line += "e",
-//                 _ if *val => line += "#",
-//                 _ => line += " ",
-//             }
-//         }
-//         println!("{}", line);
-//     }
-// }
 
 pub fn run() -> Result<(), PlatformError> {
     let appdata = AppData::new();

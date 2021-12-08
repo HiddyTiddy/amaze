@@ -119,7 +119,7 @@ impl PathFinder for Dijkstra {
                 out.push(current);
             }
 
-            out.reverse();
+            // out.reverse();
             out
         } else {
             vec![]
