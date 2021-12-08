@@ -26,17 +26,17 @@ impl PathFinder for Dfs {
                 println!("done!");
             }
             let mut neighbors = vec![];
-            if current.x < self.maze[0].len() as u16 - 1 {
-                neighbors.push(Point3::new(current.x + 1, current.y));
-            }
-            if current.y > 0 {
-                neighbors.push(Point3::new(current.x, current.y - 1));
-            }
             if current.x > 0 {
                 neighbors.push(Point3::new(current.x - 1, current.y));
             }
             if current.y < self.maze.len() as u16 - 1 {
                 neighbors.push(Point3::new(current.x, current.y + 1));
+            }
+            if current.x < self.maze[0].len() as u16 - 1 {
+                neighbors.push(Point3::new(current.x + 1, current.y));
+            }
+            if current.y > 0 {
+                neighbors.push(Point3::new(current.x, current.y - 1));
             }
             for neighbor in neighbors {
                 if !self.maze[neighbor.y as usize][neighbor.x as usize]
@@ -92,5 +92,12 @@ impl PathFinder for Dfs {
         } else {
             vec![]
         }
+    }
+}
+
+
+impl Dfs {
+    pub fn get_considered(&self) -> &Vec<Point3> {
+        &self.stack
     }
 }
