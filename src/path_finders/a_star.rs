@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use priority_queue::DoublePriorityQueue;
 
-use crate::util::{self, Point3, PointHash};
+use crate::util::{Point3, PointHash};
 
 use super::path_finder::PathFinder;
 
