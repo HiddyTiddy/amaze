@@ -9,7 +9,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [[bin]]
-name = "main"
+name = "amaze"
 path = "src/main.rs"
 
 [dependencies]
