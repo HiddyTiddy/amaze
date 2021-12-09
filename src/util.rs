@@ -32,3 +32,24 @@ impl PartialEq for Point3 {
         self.x == other.x && self.y == other.y
     }
 }
+
+
+
+pub fn get_neighbors(x: u16, y: u16, w: u16, h: u16) -> Vec<Point3> {
+    let mut neighbors = vec![];
+
+    if x != 0 {
+        neighbors.push(Point3::new(x - 1, y));
+    }
+    if y != 0 {
+        neighbors.push(Point3::new(x, y - 1));
+    }
+    if x < w - 1 {
+        neighbors.push(Point3::new(x + 1, y));
+    }
+    if y < h - 1 {
+        neighbors.push(Point3::new(x, y + 1));
+    }
+
+    neighbors
+}

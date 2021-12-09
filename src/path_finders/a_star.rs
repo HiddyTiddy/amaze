@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use priority_queue::DoublePriorityQueue;
 
-use crate::util::{Point3, PointHash};
+use crate::util::{get_neighbors, Point3, PointHash};
 
 use super::path_finder::PathFinder;
 
@@ -63,27 +63,15 @@ impl PathFinder for Astar {
                     prev[v] = u
             */
             let pt = Point3::from(pt);
-            let mut neighbors = vec![];
-            {
-                if pt.x > 0 {
-                    neighbors.push(Point3::new(pt.x - 1, pt.y).hash());
-                }
-                if pt.y > 0 {
-                    neighbors.push(Point3::new(pt.x, pt.y - 1).hash());
-                }
-                if pt.x < self.maze[0].len() as u16 - 1 {
-                    neighbors.push(Point3::new(pt.x + 1, pt.y).hash());
-                }
-                if pt.x < self.maze[0].len() as u16 - 1 {
-                    neighbors.push(Point3::new(pt.x + 1, pt.y).hash());
-                }
-                if pt.y < self.maze.len() as u16 - 1 {
-                    neighbors.push(Point3::new(pt.x, pt.y + 1).hash());
-                }
-            }
+            let neighbors = get_neighbors(
+                pt.x,
+                pt.y,
+                self.maze[0].len() as u16,
+                self.maze.len() as u16,
+            );
 
             for neighbor in neighbors {
-                if let Some((neigh, old_dist)) = self.vertex_set.remove(&neighbor) {
+                if let Some((neigh, old_dist)) = self.vertex_set.remove(&neighbor.hash()) {
                     if old_dist == u32::MAX || dist < old_dist - 1 {
                         let alt = dist + 1 + h(Point3::from(neigh), self.end);
                         self.vertex_set.push(neigh, alt);

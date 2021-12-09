@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::util::{Point3, PointHash};
+use crate::util::{Point3, PointHash, get_neighbors};
 
 use super::path_finder::PathFinder;
 
@@ -15,6 +15,8 @@ pub struct Dfs {
     start: Point3,
 }
 
+
+
 impl PathFinder for Dfs {
     fn step(&mut self) {
         if self.done {
@@ -25,19 +27,12 @@ impl PathFinder for Dfs {
                 self.done = true;
                 println!("done!");
             }
-            let mut neighbors = vec![];
-            if current.x > 0 {
-                neighbors.push(Point3::new(current.x - 1, current.y));
-            }
-            if current.y < self.maze.len() as u16 - 1 {
-                neighbors.push(Point3::new(current.x, current.y + 1));
-            }
-            if current.x < self.maze[0].len() as u16 - 1 {
-                neighbors.push(Point3::new(current.x + 1, current.y));
-            }
-            if current.y > 0 {
-                neighbors.push(Point3::new(current.x, current.y - 1));
-            }
+            let neighbors = get_neighbors(
+                current.x,
+                current.y,
+                self.maze[0].len() as u16,
+                self.maze.len() as u16,
+            );
             for neighbor in neighbors {
                 if !self.maze[neighbor.y as usize][neighbor.x as usize]
                     && !self.prev.contains_key(&neighbor.hash())
@@ -94,7 +89,6 @@ impl PathFinder for Dfs {
         }
     }
 }
-
 
 impl Dfs {
     pub fn get_considered(&self) -> &Vec<Point3> {

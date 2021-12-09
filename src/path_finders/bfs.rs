@@ -1,4 +1,4 @@
-use crate::util::{Point3, PointHash};
+use crate::util::{get_neighbors, Point3, PointHash};
 use std::collections::{HashMap, VecDeque};
 
 use super::path_finder::PathFinder;
@@ -23,27 +23,18 @@ impl PathFinder for Bfs {
             if current.hash() == self.end.hash() {
                 self.done = true;
             }
-            let mut neighbors = vec![];
-            if current.x > 0 {
-                neighbors.push((-1, 0));
-            }
-            if current.x < self.maze[0].len() as u16 - 1 {
-                neighbors.push((1, 0));
-            }
-            if current.y > 0 {
-                neighbors.push((0, -1));
-            }
-            if current.y < self.maze.len() as u16 - 1 {
-                neighbors.push((0, 1));
-            }
+            let neighbors = get_neighbors(
+                current.x,
+                current.y,
+                self.maze[0].len() as u16,
+                self.maze.len() as u16,
+            );
             for neighbor in neighbors {
-                let new = Point3::new(
-                    (current.x as i32 + neighbor.0) as u16,
-                    (current.y as i32 + neighbor.1) as u16,
-                );
-                let key = new.hash();
-                if !self.maze[new.y as usize][new.x as usize] && !self.prev.contains_key(&key) {
-                    self.queue.push_back(new);
+                let key = neighbor.hash();
+                if !self.maze[neighbor.y as usize][neighbor.x as usize]
+                    && !self.prev.contains_key(&key)
+                {
+                    self.queue.push_back(neighbor);
                     self.prev.insert(key, current.hash());
                 }
             }
@@ -67,7 +58,7 @@ impl PathFinder for Bfs {
             progress: vec![start],
             prev: HashMap::new(),
             done: false,
-            start
+            start,
         }
     }
 
