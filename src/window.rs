@@ -7,7 +7,7 @@ use crate::path_finders::{
 
 use crate::util::Point3;
 
-type Pf = Dfs;
+type Pf = Astar;
 
 use std::time::Duration;
 
@@ -72,7 +72,7 @@ impl Canvas {
     }
 }
 
-fn make_rect(coords:Point3, width: f64, height: f64) -> Rect {
+fn make_rect(coords: Point3, width: f64, height: f64) -> Rect {
     Rect::from_points(
         Point::new(
             40. + coords.x as f64 * width,
@@ -110,8 +110,10 @@ impl Widget<AppData> for Canvas {
                 if *id == self.tick_timer_id {
                     data.path_finder.step();
 
-                    self.tick_timer_id =
-                        ctx.request_timer(Duration::from_millis(data.tick_interval()));
+                    if !data.path_finder.done() {
+                        self.tick_timer_id =
+                            ctx.request_timer(Duration::from_millis(data.tick_interval()));
+                    }
                 }
                 //self.last_update = Instant::now();
             }
@@ -172,7 +174,10 @@ impl Widget<AppData> for Canvas {
                 } else {
                     Color::rgb8(0x88, 0xC0, 0xD0)
                 };
-                ctx.fill(make_rect(Point3::new(j as u16,i as u16), width, height), &color);
+                ctx.fill(
+                    make_rect(Point3::new(j as u16, i as u16), width, height),
+                    &color,
+                );
             }
         }
         for gekoloniseert in data.path_finder.get_progress() {
@@ -184,12 +189,12 @@ impl Widget<AppData> for Canvas {
             let color = Color::rgb8(0x5E, 0x81, 0xAC);
             ctx.fill(make_rect(estimated, width, height), &color);
         }
-        
-        // Dfs only
-        for each in data.path_finder.get_considered() {
-            let color = Color::rgb8(0xA3, 0xBE, 0x8C);
-            ctx.fill(make_rect(*each, width, height), &color);
-        }
+
+        // // Dfs only
+        // for each in data.path_finder.get_considered() {
+        //     let color = Color::rgb8(0xA3, 0xBE, 0x8C);
+        //     ctx.fill(make_rect(*each, width, height), &color);
+        // }
 
         ctx.fill(
             make_rect(data.path_finder.end(), width, height),
