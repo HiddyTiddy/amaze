@@ -7,13 +7,13 @@ use crate::path_finders::{
 
 use crate::util::Point3;
 
-type Pf = Astar;
+type Pf = Dfs;
 
 use std::time::Duration;
 
 use druid::{
-    widget::Flex, AppLauncher, Color, Data, Event, PlatformError, Point, Rect, RenderContext, Size,
-    TimerToken, Widget, WindowDesc,
+    widget::{Flex, Label}, AppLauncher, Color, Data, Event, PlatformError, Point, Rect, RenderContext, Size,
+    TimerToken, Widget, WindowDesc, WidgetExt,
 };
 
 #[derive(Clone, Data)]
@@ -39,8 +39,8 @@ impl AppData {
 
         AppData {
             frames_per_second: 20.0,
-            updates_per_second: 40.0,
-            path_finder: Pf::new(maze, Point3::new(0, 1), end),
+            updates_per_second: 100.0,
+            path_finder: Pf::new(maze, Point3::new(1, 1), end),
         }
     }
     fn iter_interval(&self) -> u64 {
@@ -211,7 +211,22 @@ impl Widget<AppData> for Canvas {
 }
 
 fn make_widget() -> impl Widget<AppData> {
-    Flex::column().with_flex_child(Canvas::new(), 1.0)
+    // let blurb = Label::new("confused snek 🐍")
+    //     .with_line_break_mode(druid::widget::LineBreaking::WordWrap)
+    //     .padding(8.0)
+    //     .border(Color::grey(0.6), 2.0)
+    //     .rounded(5.0)
+    //     .expand_width();
+    // Flex::column().with_flex_child(Canvas::new(), 1.0)
+    Flex::column()
+        .cross_axis_alignment(druid::widget::CrossAxisAlignment::Start)
+        // .with_child(blurb)
+        // .with_spacer(24.0)
+        .with_child(
+            Canvas::new()
+            .expand_height()
+            .expand_width()
+        )
 }
 
 pub fn run() -> Result<(), PlatformError> {
