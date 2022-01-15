@@ -50,7 +50,6 @@ pub fn gen_maze(h: u16, w: u16) -> (Vec<Vec<bool>>, Point3) {
 
     while !walls.is_empty() {
         let index = rng.gen_range(0..walls.len());
-        // println!("{} / {}", index, walls.len());
         let element = Point3::from(walls.remove(index));
 
         let mut unopen = 0;

@@ -6,6 +6,6 @@ mod window;
 use window::run;
 pub fn main() {
     if let Err(err) = run() {
-        eprintln!("error: {}", err);
+        eprintln!("error: {err}");
     }
 }

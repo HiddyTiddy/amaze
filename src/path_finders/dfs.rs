@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::util::{Point3, PointHash, get_neighbors};
+use crate::util::{get_neighbors, Point3, PointHash};
 
 use super::path_finder::PathFinder;
 
@@ -14,7 +14,6 @@ pub struct Dfs {
     done: bool,
     start: Point3,
 }
-
 
 
 impl PathFinder for Dfs {
