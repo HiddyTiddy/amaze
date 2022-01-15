@@ -12,7 +12,7 @@ type Pf = Dfs;
 use std::time::Duration;
 
 use druid::{
-    widget::{Flex, Label}, AppLauncher, Color, Data, Event, PlatformError, Point, Rect, RenderContext, Size,
+    widget::Flex, AppLauncher, Color, Data, Event, PlatformError, Point, Rect, RenderContext, Size,
     TimerToken, Widget, WindowDesc, WidgetExt,
 };
 
