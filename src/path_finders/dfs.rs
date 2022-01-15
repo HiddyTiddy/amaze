@@ -15,7 +15,6 @@ pub struct Dfs {
     start: Point3,
 }
 
-
 impl PathFinder for Dfs {
     fn step(&mut self) {
         if self.done {
@@ -89,8 +88,8 @@ impl PathFinder for Dfs {
     }
 }
 
-impl Dfs {
-    pub fn get_considered(&self) -> &Vec<Point3> {
-        &self.stack
-    }
-}
+// impl Dfs {
+//     pub fn get_considered(&self) -> &Vec<Point3> {
+//         &self.stack
+//     }
+// }
